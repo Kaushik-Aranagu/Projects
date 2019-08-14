@@ -14,10 +14,10 @@ class simplenet(nn.Module):
         super(simplenet, self).__init__()
         #print(simpnet_name)
         self.features = self._make_layers() #self._make_layers(cfg[simpnet_name])
-        # self.classifier = nn.Linear(256, classes)
-        self.classifier_ = nn.Linear(256, 100)
-        # self.classifier2_ = nn.Linear(200, 50)
-        self.classifier = nn.Linear(100, classes)
+        self.classifier = nn.Linear(256, classes)
+#         self.classifier_ = nn.Linear(256, 100)
+#         self.classifier2_ = nn.Linear(200, 50)
+#         self.classifier = nn.Linear(100, classes)
 
     def load_my_state_dict(self, state_dict):
 
@@ -52,8 +52,8 @@ class simplenet(nn.Module):
 
         out = out.view(out.size(0), -1)
 
-        out = self.classifier_(out)
-        out = F.relu(out)
+#         out = self.classifier_(out)
+#         out = F.relu(out)
         # out = self.classifier2_(out)
         # out = F.relu(out)
         out = self.classifier(out)
