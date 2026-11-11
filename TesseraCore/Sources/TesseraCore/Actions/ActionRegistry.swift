@@ -158,7 +158,8 @@ public enum ActionRegistry {
         AdvanceDishStep.descriptor.name: { try decode(AdvanceDishStep.self, AdvanceDishStep.descriptor.name, $0) },
         PauseCook.descriptor.name: { try decode(PauseCook.self, PauseCook.descriptor.name, $0) },
         ResumeCook.descriptor.name: { try decode(ResumeCook.self, ResumeCook.descriptor.name, $0) },
-        FinishCookSession.descriptor.name: { try decode(FinishCookSession.self, FinishCookSession.descriptor.name, $0) },
+        FinishCookSession.descriptor
+            .name: { try decode(FinishCookSession.self, FinishCookSession.descriptor.name, $0) },
         CreatePool.descriptor.name: { try decode(CreatePool.self, CreatePool.descriptor.name, $0) },
         LogInflow.descriptor.name: { try decode(LogInflow.self, LogInflow.descriptor.name, $0) },
         ReassignSpend.descriptor.name: { try decode(ReassignSpend.self, ReassignSpend.descriptor.name, $0) },
@@ -171,7 +172,8 @@ public enum ActionRegistry {
         CreateOccasion.descriptor.name: { try decode(CreateOccasion.self, CreateOccasion.descriptor.name, $0) },
         SetAway.descriptor.name: { try decode(SetAway.self, SetAway.descriptor.name, $0) },
         LinkToOccasion.descriptor.name: { try decode(LinkToOccasion.self, LinkToOccasion.descriptor.name, $0) },
-        UnlinkFromOccasion.descriptor.name: { try decode(UnlinkFromOccasion.self, UnlinkFromOccasion.descriptor.name, $0) },
+        UnlinkFromOccasion.descriptor
+            .name: { try decode(UnlinkFromOccasion.self, UnlinkFromOccasion.descriptor.name, $0) },
         JoinTwins.descriptor.name: { try decode(JoinTwins.self, JoinTwins.descriptor.name, $0) },
         KeepTwinsApart.descriptor.name: { try decode(KeepTwinsApart.self, KeepTwinsApart.descriptor.name, $0) },
         MarkArrived.descriptor.name: { try decode(MarkArrived.self, MarkArrived.descriptor.name, $0) },
@@ -199,6 +201,7 @@ public enum ActionRegistry {
         },
         RememberFact.descriptor.name: { try decode(RememberFact.self, RememberFact.descriptor.name, $0) },
         ForgetMemory.descriptor.name: { try decode(ForgetMemory.self, ForgetMemory.descriptor.name, $0) },
+        PatchRoom.descriptor.name: { try decode(PatchRoom.self, PatchRoom.descriptor.name, $0) },
         SetPinned.descriptor.name: { try decode(SetPinned.self, SetPinned.descriptor.name, $0) },
         SetRainAlert.descriptor.name: { try decode(SetRainAlert.self, SetRainAlert.descriptor.name, $0) },
         TakeRest.descriptor.name: { try decode(TakeRest.self, TakeRest.descriptor.name, $0) },

@@ -130,9 +130,12 @@ public final class ActionEngine {
         return undo(record)
     }
 
-    /// Commits every preview older than the grace period. Call it from a timer or on the next interaction.
+    /// Commits every preview older than the grace period, except a room patch that widens reach (it waits for Allow).
+    /// Call it from a timer or on the next interaction.
     public func commitExpired(now: Date = .now) {
-        for record in pendingRecords() where now.timeIntervalSince(record.createdAt) >= pendingGracePeriod {
+        for record in pendingRecords()
+            where now.timeIntervalSince(record.createdAt) >= pendingGracePeriod && !RoomReach.holds(record, in: store)
+        {
             record.state = .committed
             notify(record)
         }

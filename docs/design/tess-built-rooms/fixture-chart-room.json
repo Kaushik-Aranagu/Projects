@@ -1,0 +1,163 @@
+{
+  "color" : "slate",
+  "look" : {
+    "density" : "airy",
+    "motion" : "calm"
+  },
+  "name" : "Chart room",
+  "parts" : [
+    {
+      "id" : "title",
+      "kind" : "title",
+      "place" : "title",
+      "props" : {
+        "text" : "Plants"
+      }
+    },
+    {
+      "bind" : "Plant",
+      "id" : "line",
+      "kind" : "line",
+      "place" : "switcher",
+      "props" : {
+        "text" : "{count} plants, the {top} is thirsty"
+      }
+    },
+    {
+      "id" : "need",
+      "kind" : "lines",
+      "place" : "needs",
+      "props" : {
+        "lines" : [
+          "Water the thirsty ones first",
+          "Mist the ferns"
+        ]
+      }
+    },
+    {
+      "bind" : "Plant",
+      "id" : "days",
+      "kind" : "number",
+      "place" : "keystone",
+      "props" : {
+        "agg" : "count",
+        "label" : "plants"
+      }
+    },
+    {
+      "bind" : "Plant",
+      "id" : "soon",
+      "kind" : "number",
+      "place" : "keystone",
+      "props" : {
+        "agg" : "max",
+        "field" : "waterEvery",
+        "label" : "days apart",
+        "unit" : "d"
+      }
+    },
+    {
+      "id" : "pair",
+      "kind" : "stack",
+      "place" : "keystone",
+      "props" : {
+        "axis" : "h",
+        "children" : [
+          "days",
+          "soon"
+        ]
+      }
+    },
+    {
+      "bind" : "Plant",
+      "id" : "row",
+      "kind" : "row",
+      "place" : "widget",
+      "props" : {
+        "big" : "waterEvery",
+        "max" : 4,
+        "small" : "title",
+        "sort" : "-daysSince(lastWatered)"
+      }
+    },
+    {
+      "bind" : "Plant",
+      "id" : "next",
+      "kind" : "row",
+      "place" : "widget",
+      "props" : {
+        "big" : "waterEvery",
+        "max" : 2,
+        "small" : "title"
+      }
+    },
+    {
+      "id" : "both",
+      "kind" : "grid",
+      "place" : "widget",
+      "props" : {
+        "children" : [
+          "row",
+          "next"
+        ],
+        "columns" : 2
+      }
+    },
+    {
+      "id" : "top",
+      "kind" : "top",
+      "place" : "widget",
+      "props" : {
+        "field" : "lastWatered",
+        "on" : "row"
+      }
+    },
+    {
+      "bind" : "Plant",
+      "id" : "list",
+      "kind" : "list",
+      "place" : "page",
+      "props" : {
+        "big" : "waterEvery",
+        "max" : 8,
+        "small" : "title",
+        "sort" : "-daysSince(lastWatered)"
+      }
+    },
+    {
+      "id" : "leaf",
+      "kind" : "glyph",
+      "place" : "glyph",
+      "props" : {
+        "color" : "sage",
+        "symbol" : "leaf"
+      }
+    },
+    {
+      "id" : "doors",
+      "kind" : "doors",
+      "place" : "dial",
+      "props" : {
+        "doors" : [
+          {
+            "bind" : "Plant",
+            "name" : "Plants"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "water",
+      "kind" : "actionWord",
+      "place" : "actionWord",
+      "props" : {
+        "does" : "write Plant.lastWatered",
+        "object" : "the thirstiest plant",
+        "verb" : "Water"
+      }
+    }
+  ],
+  "reach" : [
+    "write Plant.lastWatered"
+  ]
+}
