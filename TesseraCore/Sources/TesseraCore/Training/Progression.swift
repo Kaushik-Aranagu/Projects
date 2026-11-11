@@ -65,7 +65,7 @@ public extension TrainingLedger {
             let raised = profile.nearest(to: top.weight + increment)
             let next = raised > top.weight + 0.001 ? raised : profile.next(above: top.weight) ?? top.weight + increment
             return SetTarget(weight: next, reps: low,
-                             reason: "Up \(unit.text(kilograms: next - top.weight)) \(unit.symbol) from last time")
+                             reason: "Up \(unit.text(kilogramsDelta: next - top.weight)) \(unit.symbol) from last time")
         }
         let target = min((reps.min() ?? low) + 1, high)
         return SetTarget(weight: top.weight, reps: max(target, low),

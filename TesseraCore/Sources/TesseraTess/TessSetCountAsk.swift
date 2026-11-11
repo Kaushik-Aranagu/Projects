@@ -9,6 +9,13 @@ public struct TessSetCountAsk: Sendable, Equatable {
         case sets
         /// One set of N kg (added load on a bodyweight lift) x M, snapped to the kit.
         case kilograms
+        /// One set of N lb x M: the pounds he said, stored as kilograms.
+        case pounds
+    }
+
+    /// The weight answer that the tapped ghost row stands for: in the unit she asked in.
+    public var weightChoice: Choice {
+        unit == .pounds ? .pounds : .kilograms
     }
 
     /// The exercise entry in focus when he said it.
@@ -20,10 +27,13 @@ public struct TessSetCountAsk: Sendable, Equatable {
     /// Said with it ("warmup 2x10", "2x10 @8"): kept on whichever answer logs (QA Q9).
     public let kind: SetKind
     public let rpe: Double?
+    /// The unit she asks in, taken when the ask is made.
+    public let unit: MassUnit
 
     public init(entry: UUID, count: Int, reps: Double, bodyweight: Bool, kind: SetKind = .working,
-                rpe: Double? = nil)
+                rpe: Double? = nil, unit: MassUnit = TessUnits.weight)
     {
+        self.unit = unit
         self.entry = entry
         self.count = count
         self.reps = reps
@@ -43,19 +53,26 @@ public struct TessSetCountAsk: Sendable, Equatable {
     }
 
     public var kilogramsAnswer: String {
-        "\(bodyweight ? "+" : "")\(count) kg"
+        "\(bodyweight ? "+" : "")\(count) \(unit.symbol)"
     }
 
     /// A said answer: "sets", "2 sets", "kg", "2 kg", "+2 kg", "kilos". Nil for anything else (the ask then drops).
     @MainActor public func choice(for phrase: String) -> Choice? {
-        let text = TessGrammar.normalize(phrase).replacing(/\bkilos?\b|\bkgs\b/, with: "kg")
-        let said = text.replacing(/^\+/, with: "").replacing(/(\d)kg$/) { "\($0.1) kg" }
+        let text = TessGrammar.normalize(phrase).replacing(/\bkilos?\b|\bkgs\b/, with: "kg").replacing(
+            /\bpounds?\b|\blbs\b/,
+            with: "lb"
+        )
+        let said = text.replacing(/^\+/, with: "").replacing(/(\d)(kg|lb)$/) { "\($0.1) \($0.2)" }
         let count = String(count)
         if said == "sets" || said == "\(count) sets" {
             return .sets
         }
+        // The unit he says is the unit he gets, whichever unit she asked in.
         if said == "kg" || said == "\(count) kg" {
             return .kilograms
+        }
+        if said == "lb" || said == "\(count) lb" {
+            return .pounds
         }
         return nil
     }

@@ -167,7 +167,7 @@ public enum TessTools {
             guard let exercise = call.grammar.resolveExercise(name) else {
                 throw TessToolError("no exercise called \(name)")
             }
-            let unit = MassUnit(parsing: args["unit"] as? String ?? "kg") ?? .kilograms
+            let unit = MassUnit(parsing: args["unit"] as? String ?? TessUnits.symbol) ?? TessUnits.weight
             return try [call.perform(LogExercise(exercise: exercise.id, weight: args.number("weight"),
                                                  reps: args.number("reps"), sets: Int(args.number("sets")),
                                                  unit: unit))]

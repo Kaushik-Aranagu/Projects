@@ -120,11 +120,17 @@ public final class TessCaptureEngine: TessCapturing {
             let set = TessGrammar.Parse.set(entry: entry, weight: weight, reps: ask.reps, kind: ask.kind,
                                             phrase: .full, rpe: ask.rpe)
             return performSets(Array(repeating: set, count: ask.count), context: context)
-        case .kilograms:
-            let said = TessGrammar.Parse.set(entry: entry, weight: Double(ask.count), reps: ask.reps, kind: ask.kind,
-                                             phrase: .full, rpe: ask.rpe)
+        case .kilograms, .pounds:
+            // The weight is in the unit he chose: pounds are stored as kilograms, and say so.
+            let unit: MassUnit = choice == .pounds ? .pounds : .kilograms
+            let said = TessGrammar.Parse.set(entry: entry, weight: unit.toKilograms(Double(ask.count)),
+                                             reps: ask.reps, kind: ask.kind, phrase: .full, unit: unit, rpe: ask.rpe)
             guard let set = grammar.snap(said, entry: entry) else {
-                return TessCapture(records: [], line: "\(ask.kilogramsAnswer) isn't loadable here.", source: .grammar)
+                return TessCapture(
+                    records: [],
+                    line: "\(ask.bodyweight ? "+" : "")\(ask.count) \(unit.symbol) isn't loadable here.",
+                    source: .grammar
+                )
             }
             do {
                 let (record, line) = try perform(set, context: context)

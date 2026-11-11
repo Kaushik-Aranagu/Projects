@@ -85,4 +85,17 @@ extension MassUnit {
         }
         return MeasureFormat.number(moved.value, unit: symbol)
     }
+
+    /// The smallest change worth saying in this unit: half a kilo or half a pound (numbers show one decimal).
+    var step: Double {
+        0.5
+    }
+
+    /// A raise in stored kilograms, in this unit and rounded to its step ("Up 5.5 lb", not "Up 5.51 lb").
+    func text(kilogramsDelta delta: Double) -> String {
+        let shown = self == .kilograms ? delta : delta * Self.poundsPerKilogram
+        // A raise is never "Up 0": at least one step.
+        let stepped = max((shown / step).rounded() * step, shown > 0 ? step : 0)
+        return MeasureFormat.number(stepped, unit: symbol)
+    }
 }

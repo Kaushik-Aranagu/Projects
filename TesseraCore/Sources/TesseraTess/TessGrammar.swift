@@ -404,14 +404,14 @@ public struct TessGrammar {
         if let match = text.firstMatch(of: /^drop(?: to)? (\d+(?:\.\d+)?)(?: (kg|lb))? (?:for|x) (\d+)$/),
            let weight = Double(match.1), let reps = Double(match.3)
         {
-            let unit = match.2.flatMap { MassUnit(parsing: String($0)) } ?? .kilograms
+            let unit = match.2.flatMap { MassUnit(parsing: String($0)) } ?? TessUnits.weight
             return .set(entry: entry, weight: unit.toKilograms(weight), reps: reps, kind: .drop, phrase: .drop,
                         unit: unit)
         }
         if let match = text.firstMatch(of: /^(\d+(?:\.\d+)?)(?: ?(kg|lb))?(?: ?x ?| for | by )(\d+)$/),
            let weight = Double(match.1), let reps = Double(match.3)
         {
-            let unit = match.2.flatMap { MassUnit(parsing: String($0)) } ?? .kilograms
+            let unit = match.2.flatMap { MassUnit(parsing: String($0)) } ?? TessUnits.weight
             return .set(entry: entry, weight: unit.toKilograms(weight), reps: reps, kind: .working, phrase: .full,
                         unit: unit)
         }

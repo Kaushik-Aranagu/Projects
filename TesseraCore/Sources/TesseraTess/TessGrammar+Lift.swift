@@ -91,7 +91,7 @@ extension TessGrammar {
     /// The numbers and words of a lift phrase.
     struct LiftWords {
         var sets = 1
-        var unit = MassUnit.kilograms
+        var unit = TessUnits.weight
         var reps: Double?
         var weight: Double?
         var words: [Substring] = []

@@ -57,7 +57,8 @@ extension TessGrammar {
             let saidReps = core.hasSuffix(" reps")
             let shown = TessVoice.number(number)
             guard let last = lastSet(in: entry) else {
-                return Live(parse: .ask(saidReps ? "\(shown) reps: at what weight?" : "\(shown): kg, or reps?"))
+                return Live(parse: .ask(saidReps ? "\(shown) reps: at what weight?" :
+                        "\(shown): \(TessUnits.symbol), or reps?"))
             }
             guard number.rounded() == number, (1 ... 50).contains(number),
                   saidReps ||
@@ -66,7 +67,7 @@ extension TessGrammar {
                   || !nearLastWeight(number, last: last.weight, dial: dial)
             else {
                 let reps = number.rounded() == number && (1 ... 50).contains(number)
-                return Live(parse: .ask(reps ? "\(shown): \(shown) kg, or \(shown) reps?" :
+                return Live(parse: .ask(reps ? "\(shown): \(shown) \(TessUnits.symbol), or \(shown) reps?" :
                         "\(shown) for how many reps?"))
             }
         }
@@ -126,8 +127,8 @@ extension TessGrammar {
             } ?? "Say the set, like 80 × 8."))
         }
         // "81 kg": a weight with no reps.
-        if let match = raw.firstMatch(of: /^(\d+(?:\.\d+)?) ?kg$/), let weight = Double(match.1) {
-            return Live(parse: .ask("\(TessVoice.number(weight)) kg for how many reps?"))
+        if let match = raw.firstMatch(of: /^(\d+(?:\.\d+)?) ?(kg|lb)$/), let weight = Double(match.1) {
+            return Live(parse: .ask("\(TessVoice.number(weight)) \(match.2) for how many reps?"))
         }
         // S705: "fail at 6" is unclear (rep 6, or 6 reps).
         if let match = raw.firstMatch(of: /^fail(?:ed)?(?: at)? (\d+)$/) {
