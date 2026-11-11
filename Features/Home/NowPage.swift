@@ -601,7 +601,7 @@ private struct GhostRow: View {
         .opacity(arrived ? 1 - Double(min(abs(drag) / 200, 0.8)) : 0)
         .contentShape(Rectangle())
         .onTapGesture(perform: accept)
-        .rowSwipe(.trailing, limit: 200) { event in
+        .rowSwipe(.trailing, limit: 200, allowsFlick: false) { event in
             switch event {
             case let .pulled(value): drag = min(0, value)
             case .committed:

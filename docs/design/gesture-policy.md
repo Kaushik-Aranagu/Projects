@@ -103,6 +103,33 @@ close, the finished screen, Tess's room and conversation, the capture wash, the 
 (through `GestureTuning.pull`). Also: Home's one thing (distance, flick and a diagonal ignored), the Places dial (10
 pt start, 120 ms tap hold-off) and the unit swipe (2x vertical lead, 28 pt per step).
 
+## Every distance that changed (for Design to tune)
+
+Consistency was the ask, so these stand as the policy sets them. Tune a number in `GestureTuning`, not at a site.
+
+| Where | Before | Now |
+| --- | --- | --- |
+| Tasks Done / Not now | arm 120, 20 pt start | arm 96, 10 pt start, flick |
+| Pantry and Places rail, To get | arm 72, 24 pt start | arm 96, 10 pt start |
+| Lists Remove / Forget | arm 96, 24 pt start | arm 96, 10 pt start, flick |
+| Routines Drop, Start | arm 90, 20 pt start | arm 96, 10 pt start |
+| Recipes column to Groceries | 40% of the column, 24 pt start | 40%, 10 pt start, flick |
+| Shop run strike | arm 72 | arm 96 |
+| Proposed capture drop | 80 pt, 12 pt start | arm 96, no flick (no Undo) |
+| Lists check off, Skip a pick, cook timer stop | 72, 60, 80 | 72 (undrawn), flick |
+| Pull down: running order (EffortHandle and StepStack included) | 30 pt | 56 pt or flick |
+| Pull: effort word, swap panel | 20 pt, 44 pt | 56 pt or flick |
+| Close: finished screen, Tess room, conversation, capture wash, exercise strip | 80, 60, 70, 40, 40 | 56 pt or flick |
+| Cook step (up / down) | 60 pt, 24 pt start | 56 pt or flick, 10 pt start |
+| Page turn: Settings and Review tabs | 40 pt at 2:1 | 60 pt or flick, 2:1 |
+| Page turn: Training log, Routines kind word, You door edge | 30 pt, 16 pt, 48 pt | 60 pt or flick, 2:1 |
+| Unit swipe on a number | 8 pt start, 14 pt a step, any vertical lead | 10 pt start, 28 pt a step, 2:1 lead |
+| Places dial | 4 pt start | 10 pt start, 120 ms tap hold-off |
+| Home one thing | 12 pt start, flick = 12 pt at 300 pt/s, any diagonal | 10 pt start, flick = 28 pt at 500 pt/s, diagonal ignored |
+
+Rows with an Undo (Tasks, Lists, Forget, Routines drop, cook timer stop, Recipes send) accept a flick; the capture drop
+has none, so only a full pull commits it.
+
 ## What it left alone, on purpose
 
 - The Home apps list (`AppsListSlot`): Builder B is hot-fixing the dead taps; its wheel should move onto

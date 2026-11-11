@@ -211,12 +211,17 @@ public struct SwipeTracker: Sendable, Equatable {
         return armed
     }
 
-    /// The outcome at lift, given the horizontal velocity at lift (positive = to the right).
-    public func outcome(velocityX: Double, arm: Double = GestureTuning.armDistance) -> SwipeOutcome {
+    /// The outcome at lift, given the horizontal velocity at lift (positive = to the right). A row that has no Undo
+    /// passes `allowsFlick: false`: only a pull past the arm distance (and not being taken back) commits it.
+    public func outcome(velocityX: Double, arm: Double = GestureTuning.armDistance,
+                        allowsFlick: Bool = true) -> SwipeOutcome
+    {
         guard lock == .horizontal, pull != 0 else { return .cancel }
         let sign = pull > 0 ? 1.0 : -1.0
         let side: SwipeSides = pull > 0 ? .leading : .trailing
-        let go = GestureTuning.commits(distance: abs(pull), velocity: velocityX * sign, arm: arm)
+        let go = allowsFlick
+            ? GestureTuning.commits(distance: abs(pull), velocity: velocityX * sign, arm: arm)
+            : abs(pull) >= arm && velocityX * sign > -GestureTuning.reverseVelocity
         return go ? .commit(side) : .cancel
     }
 

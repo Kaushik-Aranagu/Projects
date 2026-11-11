@@ -125,6 +125,15 @@ struct GestureTuningTests {
         #expect(far.outcome(velocityX: -500) == .cancel)
     }
 
+    @Test func aRowWithNoUndoNeverCommitsOnAFlick() {
+        let short = swipe([(14, 0), (50, 0)])
+        #expect(short.outcome(velocityX: 900) == .commit(.leading))
+        #expect(short.outcome(velocityX: 900, allowsFlick: false) == .cancel)
+        let far = swipe([(14, 0), (110, 0)])
+        #expect(far.outcome(velocityX: 0, allowsFlick: false) == .commit(.leading))
+        #expect(far.outcome(velocityX: -500, allowsFlick: false) == .cancel)
+    }
+
     @Test func aLeftPullCommitsToTheTrailingSide() {
         let tracker = swipe([(-14, 0), (-70, 0), (-110, 0)])
         #expect(tracker.pull == -96)

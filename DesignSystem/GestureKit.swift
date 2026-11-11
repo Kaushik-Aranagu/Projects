@@ -27,6 +27,7 @@ private struct RowSwipe: ViewModifier {
     let sides: SwipeSides
     let arm: CGFloat
     let limit: CGFloat
+    let allowsFlick: Bool
     let onEvent: (RowSwipeEvent) -> Void
 
     @State private var tracker = SwipeTracker()
@@ -68,7 +69,8 @@ private struct RowSwipe: ViewModifier {
     }
 
     private func ended(_ value: DragGesture.Value) {
-        let outcome = tracker.outcome(velocityX: Double(value.velocity.width), arm: Double(arm))
+        let outcome = tracker.outcome(velocityX: Double(value.velocity.width), arm: Double(arm),
+                                      allowsFlick: allowsFlick)
         tracker.reset()
         switch outcome {
         case let .commit(side): onEvent(.committed(side))
@@ -123,14 +125,16 @@ private struct PullGesture: ViewModifier {
 extension View {
     /// A row's swipe. `arm` is the pull at which the tick plays and a release commits; `limit` holds the pull. The row
     /// draws `.pulled`, acts on `.committed` and comes home on `.cancelled`; `.ended` is its cue to clear flags such as
-    /// "a swipe just happened, so the tap that follows is not a tap".
+    /// "a swipe just happened, so the tap that follows is not a tap". A row whose action has no Undo passes
+    /// `allowsFlick: false`, so only a full pull commits it.
     func rowSwipe(
         _ sides: SwipeSides,
         arm: CGFloat = CGFloat(GestureTuning.armDistance),
         limit: CGFloat = CGFloat(GestureTuning.swipeLimit),
+        allowsFlick: Bool = true,
         onEvent: @escaping (RowSwipeEvent) -> Void
     ) -> some View {
-        modifier(RowSwipe(sides: sides, arm: arm, limit: limit, onEvent: onEvent))
+        modifier(RowSwipe(sides: sides, arm: arm, limit: limit, allowsFlick: allowsFlick, onEvent: onEvent))
     }
 
     /// A side swipe that turns a page: `next` is true for a drag to the left. Runs alongside the page's own scroll.

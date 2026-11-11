@@ -90,9 +90,9 @@ struct ExerciseLane: View {
         .simultaneousGesture(
             DragGesture(minimumDistance: CGFloat(GestureTuning.dragStart))
                 .onChanged { drag in
+                    let lead = CGFloat(GestureTuning.pagerBias)
                     guard session.finishedAt == nil, drag.translation.height > 0,
-                          GestureTuning.axis(dx: Double(drag.translation.width), dy: Double(drag.translation.height),
-                                             bias: GestureTuning.pagerBias) == .vertical
+                          abs(drag.translation.height) >= abs(drag.translation.width) * lead
                     else { return }
                     namePull = drag.translation.height
                 }

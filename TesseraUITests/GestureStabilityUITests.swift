@@ -80,4 +80,32 @@ final class GestureStabilityUITests: SimulatorOnlyTestCase {
         XCTAssertTrue(close(app).exists, "Review is still open")
         XCTAssertFalse(app.buttons["UNDO"].exists, "a diagonal drag committed something")
     }
+
+    /// A real swipe still commits: a Done swipe on the Tasks lead finishes it and Tess offers UNDO. The policy only
+    /// ever makes swipes steadier, never dead.
+    func testATasksDoneSwipeStillCommitsAndOffersUndo() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-demo", "-demoTime", "18:10", "-resetDemo",
+                               "-review.tasksApp", "On", "-review.landingPages", "On"]
+        app.launch()
+        let apps = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Tasks"))
+        XCTAssertTrue(apps.firstMatch.waitForExistence(timeout: 20), "the apps list has Tasks")
+        let doIt = app.buttons.matching(NSPredicate(format: "label ==[c] %@", "Do it")).firstMatch
+        // The first tap brings Tasks to the middle of the list; the next opens it.
+        for _ in 0 ..< 3 where !doIt.exists {
+            apps.firstMatch.tap()
+            _ = doIt.waitForExistence(timeout: 4)
+        }
+        XCTAssertTrue(doIt.exists, "the Tasks landing opened")
+        // The lead is the large row above Do it; swipe it right, slowly and well past the arm distance.
+        let lead = app.buttons.allElementsBoundByIndex.first {
+            $0.frame.minY > 120 && $0.frame.maxY < doIt.frame.minY && $0.frame.width > 250 && $0.frame.height > 40
+        }
+        XCTAssertNotNil(lead, "the lead row is on the landing")
+        guard let lead else { return }
+        let grab = lead.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5))
+        grab.press(forDuration: 0.05, thenDragTo: grab.withOffset(CGVector(dx: 220, dy: 0)),
+                   withVelocity: .slow, thenHoldForDuration: 0.1)
+        XCTAssertTrue(app.buttons["UNDO"].waitForExistence(timeout: 6), "a Done swipe commits and offers UNDO")
+    }
 }

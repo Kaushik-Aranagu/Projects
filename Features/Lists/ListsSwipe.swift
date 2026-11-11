@@ -10,6 +10,8 @@ struct SwipeToRemove: ViewModifier {
     var word = "Remove"
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pull: CGFloat = 0
+    /// The swipe removed the row: it keeps its pull while it leaves, so it never flashes back first.
+    @State private var wentAway = false
 
     static let rises: CGFloat = 60
     static let commits: CGFloat = 96
@@ -35,20 +37,19 @@ struct SwipeToRemove: ViewModifier {
             .rowSwipe(.trailing, arm: Self.commits, limit: Self.commits + 24) { event in
                 switch event {
                 case let .pulled(value): pull = value
-                case .committed: _ = remove()
+                case .committed: wentAway = remove()
                 case .ended:
-                    if pull != 0 {
+                    if !wentAway, pull != 0 {
                         withTesseraAnimation(reduceMotion: reduceMotion) { pull = 0 }
                     }
+                    wentAway = false
                 case .cancelled, .armed, .disarmed: break
                 }
             }
     }
 
     private func remove() -> Bool {
-        guard onRemove() else { return false }
-        pull = 0
-        return true
+        onRemove()
     }
 }
 
