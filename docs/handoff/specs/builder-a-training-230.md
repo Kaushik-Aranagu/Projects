@@ -48,3 +48,21 @@ Board https://claude.ai/artifact/PFDdUde9cLtYA1G6Qjrpwp (v14). The sheet wins on
 
 ## Accept checks
 1 No ring, circle or ink D remains. 2 Reduce Motion: nothing moves. 3 A flick moves one row; a drag on the number never moves the wheel. 4 Spring-back waits 6 s and pauses while an exercise page is open. 5 Green only on large text and strokes, always with words. 6 The foot shows one word and Tess never covers the trail. 7 Undo restores a set, a swap and Done within 10 s. 8 At AX3 the wheel shows 3 rows and a name over its floor uses the short form. One PR per part to QA, all On.
+
+## Core API for the landing (landed)
+All on `TrainingStats(store:classes:)` (engine only, pure reads), words in `TrainingSentences`:
+- `weekCount(plan:now:calendar:) -> WeekCount(done, planned)` and `TrainingSentences.weekCount(_:)` -> "3 of 6 this week".
+- `weeksOnPlan(plan:now:calendar:) -> Int` and `TrainingSentences.weeksInARow(_:)` -> "5 weeks in a row on plan" (nil under 2).
+  A week counts when its sessions reached what the plan asks for (`sessionsPerWeek(of:now:)`: the plan's number, else one per
+  routine up to six; on fixed days, the days that have a routine). This week counts once met and never breaks the run
+  while it is being done.
+- `headlineGain(since:now:unit:calendar:) -> LiftGain?` and `TrainingSentences.gain(_:calendar:)` -> "+10 lb on bench press
+  since Oct 1" (nil unless a lift is up; `LiftGain.exerciseID` is what the tap opens). Shorten the exercise name in the
+  app (Tess's short form), not here.
+- Warm-up: three fields on the routine; `warmUp(of:) -> WarmUp?` (name, minutes, note; nil for none or a private
+  routine), `WarmUp.phrase` -> "8 min on the rower", `TrainingSentences.warmUpLine(_:)` -> "Starts with 8 min on the
+  rower", and the action `SetWarmUp(routine:name:minutes:note:)` (an empty name takes it off; refuses minutes outside 1
+  to 30 and a name or note that holds a secret word, a body fact or a key).
+- Skip today / Move Push A: a rest day (`TakeRest(scope: .training)`, from the element actions). A rolling plan never
+  carries debt, so the next routine simply comes next; the receipt and the 10 s Undo are the action's own.
+- Held with the Library: goals, programs and the matrix data (design is still making it).
