@@ -214,25 +214,43 @@ public enum MeasureFormat {
         (2.0 / 3, "⅔"), (3.0 / 4, "¾"), (7.0 / 8, "⅞"), (1, ""),
     ]
 
-    /// "1½ cups", "¼ tsp", "2 tbsp", "250 g", "1.5 kg", "5 ml": whole grams and millilitres; spoons and cups snap to
-    /// ⅛ ¼ ⅓ ⅜ ½ ⅝ ⅔ ¾ ⅞ when within a hair of one, else two decimals.
-    static func kitchen(_ value: Double, unit: String) -> String {
-        guard value.isFinite, value >= 0 else { return "\(value) \(unit)" }
+    /// One drawn pair: the number and its unit, apart, so a screen sizes the unit at about half the numeral (every
+    /// measured number shows its unit, Kaushik's rule 11:24 PM Oct 23). `spaced` is false for degrees ("72°F").
+    public struct Part: Equatable, Sendable {
+        public let number: String
+        public let unit: String
+        public let spaced: Bool
+
+        public init(number: String, unit: String, spaced: Bool = true) {
+            self.number = number
+            self.unit = unit
+            self.spaced = spaced
+        }
+
+        /// The pair as one line of text: "82.5 kg", "72°F".
+        public var text: String {
+            unit.isEmpty ? number : number + (spaced ? " " : "") + unit
+        }
+    }
+
+    /// A kitchen amount as its number and its unit: "1½" and "cups", "250" and "g", "less than 1" and "g".
+    static func kitchenPart(_ value: Double, unit: String) -> Part {
+        guard value.isFinite, value >= 0 else { return Part(number: "\(value)", unit: unit) }
         guard spoonAndCupUnits.contains(unit) else {
             if unit == "g" || unit == "ml" {
                 // Under 0.05 it is "less than 1 g", not "0 g"; under one, one decimal.
                 if value > 0, value < 0.05 {
-                    return "less than 1 \(unit)"
+                    return Part(number: "less than 1", unit: unit)
                 }
                 if value < 1, value > 0 {
-                    return "\(number(value, unit: "kg")) \(unit)"
+                    return Part(number: number(value, unit: "kg"), unit: unit)
                 }
             }
             // Kitchen kilograms and litres need three places (250 g is 0.25 kg, 5 ml is 0.005 l).
             if unit == "kg" || unit == "l" {
-                return "\(places3(value)) \(unit)"
+                return Part(number: places3(value), unit: unit)
             }
-            return "\(number(value, unit: unit)) \(unit)"
+            return Part(number: number(value, unit: unit), unit: unit)
         }
         let whole = value.rounded(.down)
         let rest = value - whole
@@ -241,13 +259,56 @@ public enum MeasureFormat {
         let tolerance = unit == "cup" ? 0.06 : 0.02
         // A positive amount that snaps to nothing is never "0 cup": it reads as a decimal instead.
         guard abs(snapped.0 - rest) <= tolerance, !(whole == 0 && snapped.0 == 0 && value > 0) else {
-            return "\(kitchenDecimal(value, unit: unit)) \(unit == "cup" && value > 1 ? "cups" : unit)"
+            return Part(number: kitchenDecimal(value, unit: unit), unit: unit == "cup" && value > 1 ? "cups" : unit)
         }
         let carried = snapped.0 == 1 ? whole + 1 : whole
         let fraction = snapped.0 == 1 ? "" : snapped.1
         let text = (carried > 0 ? "\(Int(carried))" : "") + fraction
         let shown = carried + (snapped.0 == 1 ? 0 : snapped.0)
-        return "\(text.isEmpty ? "0" : text) \(unit == "cup" && shown > 1.0001 ? "cups" : unit)"
+        return Part(number: text.isEmpty ? "0" : text, unit: unit == "cup" && shown > 1.0001 ? "cups" : unit)
+    }
+
+    /// "1½ cups", "¼ tsp", "2 tbsp", "250 g", "1.5 kg", "5 ml": whole grams and millilitres; spoons and cups snap to
+    /// ⅛ ¼ ⅓ ⅜ ½ ⅝ ⅔ ¾ ⅞ when within a hair of one, else two decimals.
+    static func kitchen(_ value: Double, unit: String) -> String {
+        guard value.isFinite, value >= 0 else { return "\(value) \(unit)" }
+        return kitchenPart(value, unit: unit).text
+    }
+
+    /// What a measure draws, as separate parts, each in its own role: a weight or any measured number is its numeral
+    /// and
+    /// its unit, the unit drawn at about half the numeral's size. Time past an hour is two pairs ("1" "hr", "35"
+    /// "min");
+    /// money is its amount (with the currency sign when it has one) and the currency when estimated; everything else is
+    /// one pair. Every part of a measured number has a unit; a view never formats a number or a unit by hand.
+    public static func parts(of measure: Measure) -> [Part] {
+        if measure.kind == .money {
+            let amount = String(format: "%.2f", locale: Locale(identifier: "en_US_POSIX"), measure.value)
+            if measure.isEstimate {
+                return [Part(number: amount, unit: measure.unit)]
+            }
+            // As typed: the sign against the number when the currency has one, the bare number otherwise.
+            if let sign = signs[measure.unit] {
+                return [Part(number: sign + amount, unit: "", spaced: false)]
+            }
+            return [Part(number: amount, unit: measure.unit)]
+        }
+        if measure.kind == .kitchenMass || measure.kind == .kitchenVolume {
+            return [kitchenPart(measure.value, unit: measure.unit)]
+        }
+        if measure.unit == "hr" || measure.unit == "min" {
+            let totalMinutes = measure.unit == "hr" ? measure.value * 60 : measure.value
+            if totalMinutes >= 60, totalMinutes < 600_000 {
+                let minutes = Int(totalMinutes.rounded())
+                var parts = [Part(number: "\(minutes / 60)", unit: "hr")]
+                if minutes % 60 != 0 {
+                    parts.append(Part(number: "\(minutes % 60)", unit: "min"))
+                }
+                return parts
+            }
+        }
+        let attached = measure.unit == "°C" || measure.unit == "°F"
+        return [Part(number: number(measure.value, unit: measure.unit), unit: measure.unit, spaced: !attached)]
     }
 
     public static func string(_ measure: Measure) -> String {
@@ -267,6 +328,7 @@ public enum MeasureFormat {
         if measure.unit == "hr", let text = hoursAndMinutes(measure.value) {
             return text
         }
-        return "\(number(measure.value, unit: measure.unit))\(measure.unit == "°C" || measure.unit == "°F" ? "" : " ")\(measure.unit)"
+        return Part(number: number(measure.value, unit: measure.unit), unit: measure.unit,
+                    spaced: !(measure.unit == "°C" || measure.unit == "°F")).text
     }
 }
