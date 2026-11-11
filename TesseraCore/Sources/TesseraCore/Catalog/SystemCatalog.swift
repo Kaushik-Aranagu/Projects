@@ -187,6 +187,7 @@ public enum SystemCatalog {
                   fields: [
                       FieldSpec(key: "cadence", name: "Cadence", kind: .choice, defaultValue: .choice("week"),
                                 options: ["day", "week", "month"]),
+                      FieldSpec(key: "repeats", name: "Repeats", kind: .text),
                       // Design 44: "2,5" for Mondays and Thursdays on a fixed-days plan (1 Sunday to 7 Saturday).
                       FieldSpec(key: "fixedWeekdays", name: "Days", kind: .text),
                       // Which kind of day it is, so its colour and muscles do not depend on the title ("Bench day").
@@ -257,6 +258,8 @@ public enum SystemCatalog {
                       FieldSpec(key: "rolls", name: "Rolled", kind: .number),
                       // What it's for: "cook carbonara thu" links the recipe.
                       FieldSpec(key: "about", name: "About", kind: .refList, target: .thing),
+                      // Sheet 173: a recurrence rule (text), never copies; the next date is computed from it.
+                      FieldSpec(key: "repeats", name: "Repeats", kind: .text),
                   ]),
         // Plain text with @ links; `about` holds the objects it mentions (classes via their class objects).
         ClassSpec(key: .note, name: "Note", parent: .thing, symbol: "note.text", colorRole: "neutral", fields: [
@@ -342,6 +345,7 @@ public enum SystemCatalog {
                       FieldSpec(key: "end", name: "End", kind: .date),
                       FieldSpec(key: "links", name: "Links", kind: .refList, target: .thing),
                       FieldSpec(key: "away", name: "Away", kind: .bool, defaultValue: .bool(false)),
+                      FieldSpec(key: "repeats", name: "Repeats", kind: .text),
                   ]),
         // Money in: a paycheck, a gift, a refund. Typed digits in the pool's currency.
         ClassSpec(key: .inflow, name: "Inflow", parent: .thing, symbol: "arrow.down.circle", colorRole: "neutral",
